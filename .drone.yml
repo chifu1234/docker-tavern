@@ -25,7 +25,7 @@
           - dev*
           - init
 
-    - name: Docker Hub publsih on master
+    - name: Docker Hub publsih on main
       image: plugins/docker
       settings:
         username:
@@ -39,8 +39,8 @@
       environment:
         DOCKERFILE: ./Dockerfile
       when:
-        event:
-          - tag
+        branch:
+          - main
 
     - name: Docker Hub publsih on tag
       image: plugins/docker
