@@ -2,28 +2,60 @@
   kind: pipeline
   type: docker
   name: docker-build
+  node:
+    location: glk
   steps:
 
-    - name: discord notification
-      image: appleboy/drone-discord
-      settings:
-        webhook_id:
-          from_secret: discord_webhook_id
-        webhook_token:
-          from_secret: discord_webhook_token
-        message: @Nerds Test Notifications
-
-
-    - name: publish
+    - name: Docker Hub publsih on dev
       image: plugins/docker
       settings:
-        username: kevinbacon
-        password: pa55word
-        repo: foo/bar
-        build_args:
-          - HTTP_PROXY=http://yourproxy.com
+        username:
+          from_secret: dockerhub_user
+        password:
+          from_secret: dockerhub_password
+        repo: ${DRONE_REPO}
+        tags:
+          - dev-${DRONE_COMMIT_REF//refs\/heads\//}
+        dockerfile: ${DOCKERFILE}
+      environment:
+        DOCKERFILE: ./Dockerfile
       when:
         branch:
-          - master
           - feature/*
+          - dev*
+          - init
 
+    - name: Docker Hub publsih on main
+      image: plugins/docker
+      settings:
+        username:
+          from_secret: dockerhub_user
+        password:
+          from_secret: dockerhub_password
+        repo: ${DRONE_REPO}
+        tags:
+          - latest
+        dockerfile: ${DOCKERFILE}
+      environment:
+        DOCKERFILE: ./Dockerfile
+      when:
+        branch:
+          - main
+
+    - name: Docker Hub publsih on tag
+      image: plugins/docker
+      settings:
+        username:
+          from_secret: dockerhub_user
+        password:
+          from_secret: dockerhub_password
+        repo:  ${DRONE_REPO}
+        tags:
+          - ${DRONE_COMMIT_REF//refs\/tags\//}
+          - latest
+        dockerfile: ${DOCKERFILE}
+      environment:
+        DOCKERFILE: ./Dockerfile
+      when:
+        event:
+          - tag
