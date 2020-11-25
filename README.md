@@ -1,15 +1,14 @@
-# project-template
+# docker-tavern
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://drone.buttahtoast.ch/api/badges/buttahtoast/docker-tavern/status.svg)](https://drone.buttahtoast.ch/buttahtoast/docker-tavern)
 
-Kubernetli Project  Template
+## Running tavern
 
-
-
-
-
-
-
+````bash
+$ docker run -it buttahtoast/docker-tavern:latest
+````
+Supported Tags: https://hub.docker.com/repository/docker/buttahtoast/docker-tavern/tags
 
 
 ## Contributing

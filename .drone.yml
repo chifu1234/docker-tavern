@@ -1,29 +1,30 @@
-
   kind: pipeline
   type: docker
-  name: docker-build
+  name: docker-build-publish
   node:
     location: glk
   steps:
 
-    - name: Docker Hub publsih on dev
-      image: plugins/docker
-      settings:
-        username:
-          from_secret: dockerhub_user
-        password:
-          from_secret: dockerhub_password
-        repo: ${DRONE_REPO}
-        tags:
-          - dev-${DRONE_COMMIT_REF//refs\/heads\//}
-        dockerfile: ${DOCKERFILE}
-      environment:
-        DOCKERFILE: ./Dockerfile
-      when:
-        branch:
-          - feature/*
-          - dev*
-          - init
+    # - name: Docker Hub publsih on dev
+    #   image: plugins/docker
+    #   settings:
+    #     username:
+    #       from_secret: dockerhub_user
+    #     password:
+    #       from_secret: dockerhub_password
+    #     password:
+    #       from_secret: nexus_ci_password
+    #     repo: ${DRONE_REPO}
+    #     tags:
+    #       - ${DRONE_COMMIT_SHA}
+    #     dockerfile: ${DOCKERFILE}
+    #   when:
+    #     branch:
+    #       - feature/*
+    #       - dev*
+    #       - init
+    #     event:
+    #       - push
 
     - name: Docker Hub publsih on main
       image: plugins/docker
@@ -41,6 +42,7 @@
       when:
         branch:
           - main
+          - master
 
     - name: Docker Hub publsih on tag
       image: plugins/docker
@@ -51,7 +53,7 @@
           from_secret: dockerhub_password
         repo:  ${DRONE_REPO}
         tags:
-          - ${DRONE_COMMIT_REF//refs\/tags\//}
+          - ${VERSION_PREFIX}${DRONE_COMMIT_REF//refs\/tags\//}
           - latest
         dockerfile: ${DOCKERFILE}
       environment:
@@ -59,3 +61,59 @@
       when:
         event:
           - tag
+  environment:
+    VERSION_PREFIX:
+---
+  kind: pipeline
+  type: docker
+  name: docker-audit
+  node:
+    location: glk
+  steps:
+
+    # - name: docker_build_check
+    #   image: plugins/docker
+    #   settings:
+    #     username:
+    #       from_secret: nexus_ci_user
+    #     password:
+    #       from_secret: nexus_ci_password
+    #     repo: ${NEXUS_CI_DOCKER_RESTRICTED}/${DRONE_REPO}
+    #     registry: ${NEXUS_CI_DOCKER_RESTRICTED}
+    #     tags:
+    #       - ${DRONE_COMMIT_SHA}
+    #     dockerfile: ${DOCKERFILE}
+    #   environment:
+    #     DOCKERFILE: ./Dockerfile
+    #     NEXUS_CI_DOCKER_RESTRICTED:
+    #       from_secret: nexus_ci_docker_restricted
+    #   when:
+    #     event:
+    #       - pull_request
+    #       - push
+    - name: docker_build_check
+      image: docker
+      commands:
+        - docker build . -f $${DOCKERFILE} -t $${DRONE_COMMIT_SHA}
+      volumes:
+        - name: docker
+          path: /var/run/docker.sock
+      environment:
+        DOCKERFILE: ./Dockerfile
+
+    - name: Docker Audit
+      image: goodwithtech/dockle
+      commands:
+        - dockle --exit-code 1 --exit-level fatal $${DRONE_COMMIT_SHA}
+      volumes:
+        - name: docker
+          path: /var/run/docker.sock
+      when:
+        event:
+          - pull_request
+          - push
+      depends_on: [ docker_build_check ]
+  volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock

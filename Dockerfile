@@ -1,24 +1,25 @@
 FROM python:3-slim-buster
 
 # Labels
-LABEL maintainer="oliverbaehler@hotmail.com"
+LABEL maintainer="oliverbaehler@hotmail.com,kk@sudo-i.net"
 
 ## Environment Variables
 ENV DEBUG false
 ENV LOG_TO_FILE ""
+ENV TAVERN_VERSION=1.11.1
 
 ## Copy Entrypoint
 COPY ./entrypoint.sh /
 
-## Install Dependencies
-RUN pip install --user tavern tavern \
-  && chmod +x /entrypoint.sh \
-  && groupadd -r tavern && useradd -r -s /bin/false -g tavern tavern \
-  && mkdir /tests \
-  && chown -R tavern:tavern /tests
+## Create Tavern User
+
+RUN groupadd -r tavern && useradd -m -g tavern tavern \
+  && mkdir /tavern \
+  && chown -R tavern:tavern /tavern
 
 
-
-USER root
+## Install Tavern
+USER tavern
+RUN pip install --user tavern==${TAVERN_VERSION}
 
 ENTRYPOINT ["/entrypoint.sh"]
