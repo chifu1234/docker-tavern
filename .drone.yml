@@ -10,7 +10,7 @@ steps:
         from_secret: discord_webhook_id
       webhook_token:
         from_secret: discord_webhook_token
-      message: "@Nerds Test Notification"
+      message: "@Nerds Test Notifications"
 
 
   - name: publish
