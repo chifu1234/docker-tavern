@@ -14,7 +14,7 @@
         repo: ${DRONE_REPO}
         tags:
           - dev-${DRONE_COMMIT_REF//refs\/heads\//}
-        dockerfile: {{ DOCKERFILE }}
+        dockerfile: ${DOCKERFILE}
       environment:
         DOCKERFILE: ./Dockerfile
       when:
