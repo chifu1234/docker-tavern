@@ -30,12 +30,12 @@
           from_secret: dockerhub_user
         password:
           from_secret: dockerhub_password
-        repo: {{ DRONE_REPO }}
+        repo: $${DRONE_REPO}
         tags:
           - latest
-        dockerfile: {{ DOCKERFILE }}
+        dockerfile: $${DOCKERFILE}
       environment:
-        DOCKERFILE: DOCKERFILE
+        DOCKERFILE: ./Dcokerfile
       when:
         event:
           - tag
@@ -47,11 +47,11 @@
           from_secret: dockerhub_user
         password:
           from_secret: dockerhub_password
-        repo: ${DRONE_REPO}
+        repo:  $${DRONE_REPO}
         tags:
           - prod-{{ DRONE_COMMIT_REF | regex_search('^(?<=refs\/tags\/).*$') }}
           - latest
-        dockerfile: {{ DOCKERFILE }}
+        dockerfile: $${DOCKERFILE}
       environment:
         DOCKERFILE: DOCKERFILE
       when:
