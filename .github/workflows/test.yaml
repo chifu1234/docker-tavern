@@ -1,0 +1,51 @@
+name: Drone Merge
+on:
+  - push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Fetch history
+        run: git fetch --prune --unshallow
+
+      - name: Add Drone
+        run: |
+          echo """
+            kind: pipeline
+            type: docker
+            name: docker-build
+            steps:
+
+              - name: discord notification
+                image: appleboy/drone-discord
+                settings:
+                  webhook_id:
+                    from_secret: discord_webhook_id
+                  webhook_token:
+                    from_secret: discord_webhook_token
+                  message: "@Nerds Test Notifications"
+
+
+              - name: publish
+                image: plugins/docker
+                settings:
+                  username: kevinbacon
+                  password: pa55word
+                  repo: foo/bar
+                  build_args:
+                    - HTTP_PROXY=http://yourproxy.com
+                when:
+                  branch:
+                    - master
+                    - feature/*
+          """ > .drone.yml
+
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add .drone.yml
+          git commit -sam "Add Drone"
+          git push
