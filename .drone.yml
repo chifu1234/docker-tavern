@@ -65,6 +65,18 @@
           from_secret: discord_webhook_id
         webhook_token:
           from_secret: discord_webhook_token
-        message: @Nerds Docker build for {{ DRONE_REPO }} {{ build.status}} // Infos {{build.number}} {{build.link}}"
+        message: @Nerds Test Notifications
+
+
+    - name: publish
+      image: plugins/docker
+      settings:
+        username: kevinbacon
+        password: pa55word
+        repo: foo/bar
+        build_args:
+          - HTTP_PROXY=http://yourproxy.com
       when:
-        status: [ success, failure ]
+        branch:
+          - master
+          - feature/*
