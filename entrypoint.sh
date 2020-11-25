@@ -3,10 +3,8 @@ set -e
 
 ## Execute Command, Defaults to Tavern
 if [[ -n "$@" ]]; then
-  echo "$@ - no"
   exec "$@"
 else
-  echo "I ENTER"
   ## Assemble Tavern Command
   CMD="tavern-ci"
   if [ "${DEBUG,,}" == "true" ]; then
@@ -18,7 +16,5 @@ else
     CMD="${CMD} --stdout"
   fi
   CMD="${CMD} ${TEST_DIRECTORY%/}/*"
-
-  echo "${CMD}"
   exec $CMD
 fi
