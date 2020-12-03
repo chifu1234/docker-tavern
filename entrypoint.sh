@@ -6,7 +6,7 @@ if [[ -n "$@" ]]; then
   exec "$@"
 else
   ## Assemble Tavern Command
-  CMD="~/.local/bin/tavern-ci"
+  CMD="tavern-ci"
   if [ "${DEBUG,,}" == "true" ]; then
     CMD="${CMD} --debug"
   fi
