@@ -71,6 +71,9 @@
         README_FILEPATH: /drone/src/README.md
       commands:
         - /entrypoint.sh
+        - cat /action.log
+        - ls -lah
+        - ls /drone/src/
       when:
         event:
           - tag
