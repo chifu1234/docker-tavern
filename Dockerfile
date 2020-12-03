@@ -15,7 +15,8 @@ COPY ./entrypoint.sh /
 
 RUN groupadd -r tavern && useradd -m -g tavern tavern \
   && mkdir /tavern \
-  && chown -R tavern:tavern /tavern
+  && chown -R tavern:tavern /tavern \
+  && chmod +x /entrypoint.sh && chown tavern: /entrypoint.sh
 
 
 ## Install Tavern
