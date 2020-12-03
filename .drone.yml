@@ -35,7 +35,7 @@
           from_secret: dockerhub_password
         repo: ${DRONE_REPO}
         tags:
-          - latest
+          - latest-main
         dockerfile: ${DOCKERFILE}
       when:
         branch:
@@ -61,13 +61,14 @@
           - tag
 
     - name: Docker Hub publsih README
-      image:  jlesage/drone-push-readme
-      settings:
-        username:
+      image:  peterevans/dockerhub-description
+      environment:
+        DOCKERHUB_USERNAME:
           from_secret: dockerhub_user
-        password:
+        DOCKERHUB_PASSWORD:
           from_secret: dockerhub_password
-        repo:  ${DRONE_REPO}
+        DOCKERHUB_REPOSITORY: ${DRONE_REPO}
+        README_FILEPATH: /drone/src/README.md
       when:
         event:
           - tag
