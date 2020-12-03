@@ -4,26 +4,6 @@
   node:
     location: glk
   steps:
-
-    - name: docker build test on pr
-      image: plugins/docker
-      settings:
-        username:
-          from_secret: nexus_ci_user
-        password:
-          from_secret: nexus_ci_password
-        password:
-          from_secret: nexus_ci_password
-        registry:
-          from_secret: nexus_ci_docker_restricted
-        repo: docker-restricted.buttahtoast.ch/${DRONE_REPO}
-        tags:
-          - ${DRONE_COMMIT_SHA}
-        dockerfile: ${DOCKERFILE}
-      when:
-        event:
-          - pull_request
-
     - name: docker build test on dev
       image: plugins/docker
       settings:
@@ -33,9 +13,8 @@
           from_secret: nexus_ci_password
         password:
           from_secret: nexus_ci_password
-        registry:
-          from_secret: nexus_ci_docker_restricted
-        repo: docker-restricted.buttahtoast.ch/${DRONE_REPO}
+        registry: docker.buttahtoast.ch
+        repo: docker.buttahtoast.ch/${DRONE_REPO}
         tags:
           - ${DRONE_COMMIT_SHA}
         dockerfile: ${DOCKERFILE}
@@ -104,26 +83,6 @@
     location: glk
   steps:
 
-    # - name: docker_build_check
-    #   image: plugins/docker
-    #   settings:
-    #     username:
-    #       from_secret: nexus_ci_user
-    #     password:
-    #       from_secret: nexus_ci_password
-    #     repo: ${NEXUS_CI_DOCKER_RESTRICTED}/${DRONE_REPO}
-    #     registry: ${NEXUS_CI_DOCKER_RESTRICTED}
-    #     tags:
-    #       - ${DRONE_COMMIT_SHA}
-    #     dockerfile: ${DOCKERFILE}
-    #   environment:
-    #     DOCKERFILE: ./Dockerfile
-    #     NEXUS_CI_DOCKER_RESTRICTED:
-    #       from_secret: nexus_ci_docker_restricted
-    #   when:
-    #     event:
-    #       - pull_request
-    #       - push
     - name: docker_build_check
       image: docker
       commands:
@@ -150,3 +109,40 @@
   - name: docker
     host:
       path: /var/run/docker.sock
+---
+  kind: pipeline
+  type: docker
+  name: validate-pr-docker
+  node:
+    location: glk
+  steps:
+
+    - name: docker build test on pr
+      image: plugins/docker
+      settings:
+        username:
+          from_secret: nexus_ci_user
+        password:
+          from_secret: nexus_ci_password
+        registry: docker.buttahtoast.ch
+        repo: docker.buttahtoast.ch/${DRONE_REPO}
+        tags:
+          - ${DRONE_COMMIT_SHA}
+        dockerfile: ${DOCKERFILE}
+      when:
+        event:
+          - pull_request
+
+    - name: comment-pr
+      image: gboo/github-pr
+      settings:
+        github_token:
+          from_secret: github_api_token
+        action: comment
+        message: "This PR looks good so far! Test it ```docker run -it docker.buttahtoast.ch/${DRONE_REPO}:${DRONE_COMMIT_SHA} ```"
+      when:
+        event: pull_request
+        status: [ success ]
+  environment:
+    VERSION_PREFIX:
+    DOCKERFILE: ./Dockerfile
