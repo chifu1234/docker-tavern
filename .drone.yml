@@ -5,26 +5,47 @@
     location: glk
   steps:
 
-    # - name: Docker Hub publsih on dev
-    #   image: plugins/docker
-    #   settings:
-    #     username:
-    #       from_secret: dockerhub_user
-    #     password:
-    #       from_secret: dockerhub_password
-    #     password:
-    #       from_secret: nexus_ci_password
-    #     repo: ${DRONE_REPO}
-    #     tags:
-    #       - ${DRONE_COMMIT_SHA}
-    #     dockerfile: ${DOCKERFILE}
-    #   when:
-    #     branch:
-    #       - feature/*
-    #       - dev*
-    #       - init
-    #     event:
-    #       - push
+    - name: docker build test on pr
+      image: plugins/docker
+      settings:
+        username:
+          from_secret: nexus_ci_user
+        password:
+          from_secret: nexus_ci_password
+        password:
+          from_secret: nexus_ci_password
+        registry:
+          from_secret: nexus_ci_docker_restricted
+        repo: docker-restricted.buttahtoast.ch/${DRONE_REPO}
+        tags:
+          - ${DRONE_COMMIT_SHA}
+        dockerfile: ${DOCKERFILE}
+      when:
+        event:
+          - pull_request
+
+    - name: docker build test on dev
+      image: plugins/docker
+      settings:
+        username:
+          from_secret: nexus_ci_user
+        password:
+          from_secret: nexus_ci_password
+        password:
+          from_secret: nexus_ci_password
+        registry:
+          from_secret: nexus_ci_docker_restricted
+        repo: docker-restricted.buttahtoast.ch/${DRONE_REPO}
+        tags:
+          - ${DRONE_COMMIT_SHA}
+        dockerfile: ${DOCKERFILE}
+      when:
+        branch:
+          - feature/*
+          - dev*
+          - init
+        event:
+          - push
 
     - name: Docker Hub publsih on main
       image: plugins/docker
@@ -37,12 +58,12 @@
         tags:
           - latest
         dockerfile: ${DOCKERFILE}
-      environment:
-        DOCKERFILE: ./Dockerfile
       when:
         branch:
           - main
           - master
+        event:
+          - push
 
     - name: Docker Hub publsih on tag
       image: plugins/docker
@@ -56,13 +77,25 @@
           - ${VERSION_PREFIX}${DRONE_COMMIT_REF//refs\/tags\//}
           - latest
         dockerfile: ${DOCKERFILE}
-      environment:
-        DOCKERFILE: ./Dockerfile
       when:
         event:
           - tag
+
+    - name: Docker Hub publsih README
+      image:  jlesage/drone-push-readme
+      settings:
+        username:
+          from_secret: dockerhub_user
+        password:
+          from_secret: dockerhub_password
+        repo:  ${DRONE_REPO}
+      when:
+        event:
+          - tag
+
   environment:
     VERSION_PREFIX:
+    DOCKERFILE: ./Dockerfile
 ---
   kind: pipeline
   type: docker
