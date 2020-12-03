@@ -11,9 +11,12 @@ Vist Tavern's website to learn more:
 
 ## Running tavern
 
+Simply map your tavern suites into the tavern container:
+
 ```
-$ docker run -it buttahtoast/docker-tavern:latest
+$ docker run -v ./tavern-tests:/tavern -it buttahtoast/docker-tavern:latest
 ```
+
 Supported Tags: https://hub.docker.com/repository/docker/buttahtoast/docker-tavern/tags
 
 ### Configuration
