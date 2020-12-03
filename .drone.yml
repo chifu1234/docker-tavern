@@ -69,6 +69,8 @@
           from_secret: dockerhub_password
         DOCKERHUB_REPOSITORY: ${DRONE_REPO}
         README_FILEPATH: /drone/src/README.md
+      commands:
+        - /entrypoint.sh
       when:
         event:
           - tag
