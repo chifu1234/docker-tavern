@@ -43,6 +43,8 @@
           - master
         event:
           - push
+        exclude:
+        - pull_request
 
     - name: Docker Hub publsih on tag
       image: plugins/docker
